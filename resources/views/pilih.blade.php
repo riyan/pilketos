@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Aplikasi Pemilihan Ketua OSIS</title>
+    <link href="{{asset('css/bootstrap/bootstrap.min.css')}}" rel="stylesheet">
+    <style>
+        html {
+            font-size: 14px;
+        }
+        @media (min-width: 768px) {
+            html {
+                font-size: 16px;
+            }
+        }
+
+        body {
+            background-image: url("{{asset('storage/bg-pliketos.png')}}");
+            background-position: top;
+            background-repeat: no-repeat;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 960px;
+        }
+
+        .pricing-header {
+            max-width: 700px;
+        }
+
+        .card-deck .card {
+            min-width: 220px;
+        }
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+        .h-32{ height: 8rem; }
+        #loading {
+            position: fixed;
+            display: flex;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0.7;
+            background-color: #000;
+            z-index: 99;
+        }
+
+        .loading-image {
+            z-index: 100;
+            margin: auto;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+        <a href="/">
+            <img class="h-32 w-auto text-center" src="{{ asset('storage/panitia_osis_logo.png') }}" alt="pilketos">
+        </a>
+        <h3 class="mt-1">PEMILIHAN KETUA OSIS SMPN 23 BANJARMASIN</h3>
+        <h5 id="judul">Hi, <span class="text-danger">{{$namax}}</span> Silahkan pilih salah satu dari kandidad dibawah ini</h5>
+    </div>
+
+    <div class="container">
+        <div id="kandidat" class="card-deck mb-3 text-center">
+            @foreach ($paslon as $p)
+            <div id="paslon{{$p->no_urut}}" class="card mb-4 shadow-sm card-paslon" data-pid={{$whoid}} data-paslonid="{{$p->id}}">
+                <div class="card-header bg-danger">
+                    <h3 class="my-0 font-extrabold text-white">0{{$p->no_urut}}</h3>
+                </div>
+                <div class="card-body">
+                    <img class="img-fluid" src="{{asset('storage/'.$p->foto)}}" alt="">
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li class="font-weight-bold">{{strtoupper($p->nama1)}}</li>
+                        <li class="font-weight-bold">{{strtoupper($p->nama2)}}</li>
+                    </ul>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        <div id="info" class="card mb-4 shadow-sm">
+            <div class="card-header bg-danger">
+                <h3 class="my-0 font-extrabold text-center text-white">INFORMASI</h3>
+            </div>
+            <div class="card-body text-center">
+                <h3 class="text-danger">YAY.. SUARA KAMU TELAH TERKIRIM!</h3>
+                <h4>TERIMA KASIH TELAH IKUT SERTA <br> DALAM MENSUKSESKAN PROYEK SUARA DEMOKRASI</h4>
+            </div>
+        </div>
+
+        <footer class="pt-4 my-md-2 pt-md-5 border-top">
+            <div class="row">
+
+            </div>
+        </footer>
+    </div>
+    <div id="loading">
+        <div>
+            <svg class="loading-image" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" width="200" height="200" style="shape-rendering: auto; display: block; background: transparent;" xmlns:xlink="http://www.w3.org/1999/xlink"><g><circle stroke-linecap="round" fill="none" stroke-dasharray="50.26548245743669 50.26548245743669" stroke="#ff0011" stroke-width="8" r="32" cy="50" cx="50">
+                <animateTransform values="0 50 50;360 50 50" keyTimes="0;1" repeatCount="indefinite" dur="1s" type="rotate" attributeName="transform"></animateTransform>
+            </circle>
+            <circle stroke-linecap="round" fill="none" stroke-dashoffset="36.12831551628262" stroke-dasharray="36.12831551628262 36.12831551628262" stroke="#ffffff" stroke-width="8" r="23" cy="50" cx="50">
+                <animateTransform values="0 50 50;-360 50 50" keyTimes="0;1" repeatCount="indefinite" dur="1s" type="rotate" attributeName="transform"></animateTransform>
+            </circle><g></g></g><!-- [ldio] generated by https://loading.io -->
+            </svg>
+            <h3>MENGIRIM PILIHAN MOHON MENUNGGU...</h3>
+        </div>
+    </div>
+    <script type="text/javascript" src="{{asset('js/jquery-3.7.1.min.js')}}"></script>
+    <script>
+        $(function() {
+            $('#loading').hide(); $('#info').hide();
+            $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
+            $('div.card-paslon').on('click',function(){
+                $('#loading').show();
+                $.post('/pilihpaslon', { pid:$(this).data('pid'), pil:$(this).data('paslonid') } )
+                    .done(function(d){
+                        if (d > 0) {
+                            $('#loading').hide();
+                            $('#kandidat').hide();
+                            $('#info').show();
+                            $('#judul').hide();
+                            setTimeout(() => {
+                                window.location = '/';
+                            }, 3000);
+                        }
+                    });
+            });
+        });
+    </script>
+  </body>
+</html>
